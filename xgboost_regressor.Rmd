@@ -1,0 +1,88 @@
+---
+title: "xgboost_regressor"
+author: "clinton"
+date: "2023-01-27"
+output: html_document
+---
+
+Example with telco churn data
+load libraries
+```{r}
+library(data.table)
+library(xgboost)
+library(caret)
+library(FeatureHashing)
+library(tidyr)
+```
+
+data import
+```{r}
+telco_churn <- fread("data_try/telco_churn_train.csv")
+telco_churn <- telco_churn[,-"customerID"]
+```
+
+Encode categorical variables
+```{r}
+m.mat <- hashed.model.matrix(c("gender", "Partner","Dependents","SeniorCitizen","tenure","Dependents","PhoneService","MultipleLines",
+                               "InternetService","OnlineSecurity","OnlineBackup","DeviceProtection","TechSupport","StreamingTV",
+                               "StreamingMovies","Contract","PaperlessBilling","PaymentMethod","MonthlyCharges","TotalCharges"), 
+                             telco_churn, hash.size = 2 ^ 10,
+                             create.mapping = TRUE)
+```
+
+Hash mapping 
+
+```{r}
+# Extract the mapping
+mapping <- hash.mapping(m.mat)
+# Check collision rate
+mean(duplicated(mapping))
+## [1] 0.05825243
+# Names
+names(mapping)
+```
+
+```{r}
+hashed.value(names(mapping))
+```
+
+Train 
+This will go to the train script
+```{r}
+bst <- xgboost(data = m.mat, label = telco_churn$Churn, nround = 10, params = list(
+  booster = "gbtree",
+  objective = "binary:logistic",
+  eval_metric = "auc"
+))
+```
+
+Prediction 
+Prepare the test data as well
+This will go to the preprocessor
+```{r}
+testdata <- fread("data_try/telco_churn_test.csv")
+```
+
+```{r}
+m.mat.test <- hashed.model.matrix(c("gender", "Partner","Dependents","SeniorCitizen","tenure","Dependents","PhoneService","MultipleLines",
+                               "InternetService","OnlineSecurity","OnlineBackup","DeviceProtection","TechSupport","StreamingTV",
+                               "StreamingMovies","Contract","PaperlessBilling","PaymentMethod","MonthlyCharges","TotalCharges"), 
+                             testdata, hash.size = 2 ^ 10,
+                             create.mapping = TRUE)
+```
+
+Predict
+This will go to the test script 
+```{r}
+predictions <- predict(bst,m.mat.test)
+
+testdata_preds <- cbind(testdata,predictions)
+
+testdata_preds <- testdata_preds[,c("customerID","Churn","predictions")]
+
+telcopredictions <- tidyr::pivot_wider(testdata_preds,names_from="Churn",values_from="predictions")
+
+telcopredictions_n <- setDT(telcopredictions)[is.na(Yes),Yes := 1-No][is.na(No),No := 1-Yes]
+
+```
+

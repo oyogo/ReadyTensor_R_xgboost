@@ -37,3 +37,7 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+/data_try
+*.Rproj
+*.DS_Store
