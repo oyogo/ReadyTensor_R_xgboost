@@ -28,6 +28,7 @@ m.mat <- hashed.model.matrix(c("gender", "Partner","Dependents","SeniorCitizen",
                                "StreamingMovies","Contract","PaperlessBilling","PaymentMethod","MonthlyCharges","TotalCharges"), 
                              telco_churn, hash.size = 2 ^ 10,
                              create.mapping = TRUE)
+m.mat
 ```
 
 Hash mapping 
@@ -84,5 +85,9 @@ telcopredictions <- tidyr::pivot_wider(testdata_preds,names_from="Churn",values_
 
 telcopredictions_n <- setDT(telcopredictions)[is.na(Yes),Yes := 1-No][is.na(No),No := 1-Yes]
 
+```
+
+```{r}
+telco_test <- fread("data_try/telco_churn_test.csv")
 ```
 
