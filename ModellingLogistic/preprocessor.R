@@ -64,16 +64,22 @@ for (cat_coll in cat_vars) {
 
 }
 
-genericdata <- mutate(genericdata, Churn=
-                   case_when(Churn == "Yes" ~ 1,
-                             Churn == "No" ~ 0,TRUE ~ as.numeric(Churn)))
+# genericdata <- mutate(genericdata, Churn=
+#                    case_when(Churn == "Yes" ~ 1,
+#                              Churn == "No" ~ 0,TRUE ~ as.numeric(Churn)))
 
-# encode the categorical variables and create a matrix for the xgboost training
-modelmat <- hashed.model.matrix(c(catcols,v),
-                             genericdata, hash.size = 2 ^ 10,
-                             create.mapping = TRUE)
+#genericdata <- setDT(genericdata)[, eval(varr) := fifelse(eval(varr)=="yes",1,0)]#[,eval(varr) := as.numeric(eval(varr))]
+#genericdata <- genericdata[,eval(varr):=as.numeric(eval(varr))]
 
-return(list(modelmat,genericdata,varr,idfieldname))
+
+
+# # encode the categorical variables and create a matrix for the xgboost training
+# modelmat <- hashed.model.matrix(c(catcols,v),
+#                              genericdata, hash.size = 2 ^ 10,
+#                              create.mapping = TRUE)
+# 
+# return(list(modelmat,genericdata,varr,idfieldname))
+return(unique(genericdata$Churn))
   
 }
 

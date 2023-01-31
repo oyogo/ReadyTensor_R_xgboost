@@ -15,45 +15,36 @@ genericdata <- fread(paste0("./../ml_vol/inputs/data/training/binaryClassificati
 
 # call the preprocessing pipeline 
 source("preprocessor.R")
+preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)
 
 
-varr <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[3]]
-modelmat <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[1]]
-#resvars <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[3]]
-training_data <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[2]]
-#print(head(training_data))
-
-# # Extract the mapping
-# mapping_n <- hash.mapping(modelmat)
-# # Check collision rate
-# mean(duplicated(mapping_n))
-# ## [1] 0.05825243
-# # Names
-# names(mapping_n)
-
-# function to train the model  and save it back into the mounted volume
-lets_train <- function(dat,rvar){
-
-  # get the names of the independent variables and store them as a vector
-  #indvars <- names(dat)
-  #indvars <- predictors$fieldNames
-
-  # reformulate function from the base stats package was quite a savior in creating the from a character vector.
-  # this will enable us to supply the response variable and the independent variables as characters and then reformulate will
-  # evaluate them as variables.
-  #theModel <- glm(reformulate(termlabels = indvars, response = rvar),family=binomial(link='logit'), data = dat)
-
-  bst <- xgboost(data = dat, label = training_data[,c(eval(rvar))], nround = 10, params = list(
-    booster = "gbtree",
-    objective = "binary:logistic",
-    eval_metric = "auc"
-  ))
-  #return(bst)
-  # save the model into the artifacts folder in the attached volume.
-  saveRDS(bst, "./../ml_vol/model/artifacts/model.rds")
-
-}
-
-# calling the model
-glmModel <- lets_train(dat=modelmat, rvar = varr)
-
+# varr <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[3]]
+# modelmat <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[1]]
+# #resvars <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[3]]
+# training_data <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[2]]
+# #print(head(training_data))
+# 
+# # # Extract the mapping
+# # mapping_n <- hash.mapping(modelmat)
+# # # Check collision rate
+# # mean(duplicated(mapping_n))
+# # ## [1] 0.05825243
+# # # Names
+# # names(mapping_n)
+# 
+# # function to train the model  and save it back into the mounted volume
+# lets_train <- function(dat,rvar){
+# 
+#   bst <- xgboost(data = dat, label = training_data[,c(eval(rvar))], nround = 10, params = list(
+#     booster = "gbtree",
+#     objective = "binary:logistic",
+#     eval_metric = "auc"
+#   ))
+#   # save the model into the artifacts folder in the attached volume.
+#   saveRDS(bst, "./../ml_vol/model/artifacts/model.rds")
+# 
+# }
+# 
+# # calling the model
+# glmModel <- lets_train(dat=modelmat, rvar = varr)
+# 
