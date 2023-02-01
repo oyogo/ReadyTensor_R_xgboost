@@ -10,6 +10,17 @@ library(stringr)
 library(dplyr)
 library(glue)
 
+
+hashing <- function(df,features){
+  
+  mat <- hashed.model.matrix(features,
+                                  df, hash.size = 2 ^ 10,
+                                  create.mapping = TRUE)
+  return(mat)
+  
+}
+
+
 preprocessing <- function(fname_train,fname_schema,genericdata,dataschema){ 
 
 
@@ -69,11 +80,10 @@ data_noid <- subset(genericdata,select = -c(eval(as.name(paste0(idfieldname)))))
 
 output_vector <- data_noid[,glue({var})] %in% c("Yes",1)
 
+features <- c(catcols,v)
 # encode the categorical variables and create a matrix for the xgboost training
-modelmat <- hashed.model.matrix(c(catcols,v),
-                             data_noid, hash.size = 2 ^ 10,
-                             create.mapping = TRUE)
+modelmat <- hashing(df = data_noid, features = features)
 
- return(list(modelmat,output_vector,idfieldname,varr,data_withid))
+ return(list(modelmat,output_vector,idfieldname,varr,data_withid,features))
   
 }

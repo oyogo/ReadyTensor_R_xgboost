@@ -13,6 +13,7 @@ library(xgboost)
 library(caret)
 library(FeatureHashing)
 library(tidyr)
+library(rjson)
 ```
 
 data import
@@ -89,5 +90,14 @@ telcopredictions_n <- setDT(telcopredictions)[is.na(Yes),Yes := 1-No][is.na(No),
 
 ```{r}
 telco_test <- fread("data_try/telco_churn_test.csv")
+```
+
+## create json data object for testing the API 
+
+```{r}
+library(jsonlite)
+telco2 <- telco_test[1:2] 
+telco_json <- rjson::toJSON(telco2)
+write_json(telco_json,"./telcojsn.json")
 ```
 
