@@ -18,9 +18,10 @@ idfieldname <- tdataschema$inputDatasets$binaryClassificationBaseMainInput$idFie
 
 source("preprocessor.R")
 
-resvar <- preprocessing(fname_train=fname_test,fname_schema=fname_schema,genericdata=testdata,dataschema=tdataschema)[[3]]
-test_data <- preprocessing(fname_train=fname_test,fname_schema=fname_schema,genericdata=testdata,dataschema=tdataschema)[[2]]
+output_vector <- preprocessing(fname_train=fname_test,fname_schema=fname_schema,genericdata=testdata,dataschema=tdataschema)[[2]]
+resvar <- preprocessing(fname_train=fname_test,fname_schema=fname_schema,genericdata=testdata,dataschema=tdataschema)[[4]]
 testdata_matrix <- preprocessing(fname_train=fname_test,fname_schema=fname_schema,genericdata=testdata,dataschema=tdataschema)[[1]]
+test_data <- preprocessing(fname_train=fname_test,fname_schema=fname_schema,genericdata=testdata,dataschema=tdataschema)[[5]]
 
 # load the trained model
 xgb_logistic <- readRDS("./../ml_vol/model/artifacts/model.rds")
@@ -34,8 +35,8 @@ testing <- function()
   
   testpredictions <- tidyr::pivot_wider(testdata_preds,names_from=eval(resvar),values_from="predictions")
  
-  testpredictions_n <- setDT(testpredictions)[is.na(`1`),`1` := 1-`0`][is.na(`0`),`0` := 1-`1`]
-  write.csv(testpredictions_n,"./../ml_vol/outputs/testing_outputs/testpredictions.csv")
+  #testpredictions_n <- setDT(testpredictions)[is.na(`1`),`1` := 1-`0`][is.na(`0`),`0` := 1-`1`]
+  write.csv(testpredictions,"./../ml_vol/outputs/testing_outputs/testpredictions.csv")
 
 }
 

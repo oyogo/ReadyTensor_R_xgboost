@@ -8,11 +8,10 @@ library(rjson) # for handling json data
 library(FeatureHashing)
 library(stringr)
 library(dplyr)
+library(glue)
 
 preprocessing <- function(fname_train,fname_schema,genericdata,dataschema){ 
-  
 
-  #names(genericdata) <- gsub("%","x",names(genericdata))
 
   # get the response variable and store it as a string to a variable
   varr <- dataschema$inputDatasets$binaryClassificationBaseMainInput$targetField
@@ -29,7 +28,6 @@ predictor_fields <- setDT(predictor_fields)
 
 # melt the data.table into long format so as to filter numeric columns. 
 predictor_fields <- melt(predictor_fields,measure.vars=patterns(fieldNames="fieldName",dataTypes="dataType"))
-#predictor_fields$fieldNames <- gsub("%", "x", predictor_fields$fieldNames)
 # filter the numeric columns 
 num_vars <- predictor_fields[dataTypes=="NUMERIC",.(fieldNames)]
 
@@ -64,23 +62,18 @@ for (cat_coll in cat_vars) {
 
 }
 
-# genericdata <- mutate(genericdata, Churn=
-#                    case_when(Churn == "Yes" ~ 1,
-#                              Churn == "No" ~ 0,TRUE ~ as.numeric(Churn)))
+var <- as.symbol(varr)
 
-#genericdata <- setDT(genericdata)[, eval(varr) := fifelse(eval(varr)=="yes",1,0)]#[,eval(varr) := as.numeric(eval(varr))]
-#genericdata <- genericdata[,eval(varr):=as.numeric(eval(varr))]
+data_withid <- genericdata
+data_noid <- subset(genericdata,select = -c(eval(as.name(paste0(idfieldname)))))
 
+output_vector <- data_noid[,glue({var})] %in% c("Yes",1)
 
+# encode the categorical variables and create a matrix for the xgboost training
+modelmat <- hashed.model.matrix(c(catcols,v),
+                             data_noid, hash.size = 2 ^ 10,
+                             create.mapping = TRUE)
 
-# # encode the categorical variables and create a matrix for the xgboost training
-# modelmat <- hashed.model.matrix(c(catcols,v),
-#                              genericdata, hash.size = 2 ^ 10,
-#                              create.mapping = TRUE)
-# 
-# return(list(modelmat,genericdata,varr,idfieldname))
-return(unique(genericdata$Churn))
+ return(list(modelmat,output_vector,idfieldname,varr,data_withid))
   
 }
-
-#head(preprocessing(genericdata = genericdata, dataschema = dataschema)[[1]])
