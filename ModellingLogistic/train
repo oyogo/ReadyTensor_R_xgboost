@@ -20,7 +20,7 @@ source("preprocessor.R")
 output_vector <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[2]]
 modelmat <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[1]]
 features <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[6]]
-
+id <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[3]]
 # function to train the model  and save it back into the mounted volume
 lets_train <- function(dat,rvar){
 
