@@ -30,13 +30,24 @@ testing <- function()
 {
   df <- testdata_matrix
   predictions <- predict(xgb_logistic, newdata = testdata_matrix , type = "response")
+  # label encode the response variable
+  #test_data[,c(eval(resvar))] <- as.numeric(factor(test_data[,c(eval(resvar))]))
   thepredictions <- cbind(test_data, predictions)
   testdata_preds <- thepredictions[,c(eval(idfieldname),eval(resvar),"predictions")]
   
   testpredictions <- tidyr::pivot_wider(testdata_preds,names_from=eval(resvar),values_from="predictions")
- 
-  #testpredictions_n <- setDT(testpredictions)[is.na(`1`),`1` := 1-`0`][is.na(`0`),`0` := 1-`1`]
-  write.csv(testpredictions,"./../ml_vol/outputs/testing_outputs/testpredictions.csv")
+  # colname_first_category <- names(testpredictions)[2]
+  # colname_second_category <- names(testpredictions)[3]
+  #testpredictions <- setDT(testpredictions)[,c(eval(idfieldname),eval(colname_first_category))]
+  # testpredictions_n <- setDT(testpredictions)[is.na(eval(colname_first_category)),
+  #                                             eval(colname_first_category) := 
+  #                                               1-eval(colname_second_category)][is.na(eval(colname_second_category)),
+  #                                                                                eval(colname_second_category) := 1-eval(colname_first_category)]
+  
+  testpredictions_n <- setDT(testpredictions)[is.na(`1`),`1` := 1-`0`][is.na(`0`),`0` := 1-`1`]
+  
+  #print(testpredictions)
+  write.csv(testpredictions_n,"./../ml_vol/outputs/testing_outputs/testpredictions.csv")
 
 }
 

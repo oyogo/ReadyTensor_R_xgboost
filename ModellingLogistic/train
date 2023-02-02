@@ -15,7 +15,7 @@ genericdata <- fread(paste0("./../ml_vol/inputs/data/training/binaryClassificati
 
 # call the preprocessing pipeline 
 source("preprocessor.R")
-
+#preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)
 
 output_vector <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[2]]
 modelmat <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdata=genericdata,dataschema=dataschema)[[1]]
@@ -24,16 +24,17 @@ id <- preprocessing(fname_train=fname_train,fname_schema=fname_schema,genericdat
 # function to train the model  and save it back into the mounted volume
 lets_train <- function(dat,rvar){
 
-  bst <- xgboost(data = dat, label = output_vector,#training_data[,c(eval(rvar))], 
+  bst <- xgboost(data = dat, label = output_vector,#training_data[,c(eval(rvar))],
                  nround = 10, params = list(
     booster = "gbtree",
     objective = "binary:logistic",
     eval_metric = "auc"
   ))
-  
+
   # save the model into the artifacts folder in the attached volume.
   saveRDS(bst, "./../ml_vol/model/artifacts/model.rds")
-  saveRDS(features,"./../ml_vol/model/artifacts/features.rds")
+  saveRDS(id,"./../ml_vol/model/artifacts/id.rds")
+  saveRDS(features,"./../ml_vol/model/artifacts/features.rds") # we'll need this on the serve script (to convert the json data input to a matrix)
 
 }
 

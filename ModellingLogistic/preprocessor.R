@@ -1,16 +1,18 @@
 
 #####*****Preprocessing script*****######
 #####* This is where we process the data, say imputing NA's with mean plus any other transformation that can be done. 
-#####* This function will be sourced in the training script before fitting the model. 
+#####* This function will be sourced in the training script before fitting the model and the prediction script to transform the test dataset. 
 
 library(data.table) # Opted for this, 1. Because its really fast 2. dplyr conflicted with plumber
 library(rjson) # for handling json data
 library(FeatureHashing)
-library(stringr)
-library(dplyr)
 library(glue)
+library(superml)
 
 
+# function for transforming the prediction features into a sparse matrix for training and prediction.
+##* Will export this function to the API to transform the json data shared through the plumber API.
+##* The function takes in two arguments : dataframe and prediction variables and returns a hashed matrix.
 hashing <- function(df,features){
   
   mat <- hashed.model.matrix(features,
@@ -20,7 +22,7 @@ hashing <- function(df,features){
   
 }
 
-
+#* To perform general transformations and cleaning of the data.
 preprocessing <- function(fname_train,fname_schema,genericdata,dataschema){ 
 
 
@@ -75,10 +77,15 @@ for (cat_coll in cat_vars) {
 
 var <- as.symbol(varr)
 
-data_withid <- genericdata
+# label encode the response variable
+lbl <- LabelEncoder$new()
+
+genericdata[,c(glue({var}))] <- lbl$fit_transform(genericdata[,c(glue({var}))])
+
+data_withid <- genericdata # will need this for the prediction output(we need the id column for aligning the predictions with the respective id)
 data_noid <- subset(genericdata,select = -c(eval(as.name(paste0(idfieldname)))))
 
-output_vector <- data_noid[,glue({var})] %in% c("Yes",1)
+output_vector <- data_noid[,glue({var})]
 
 features <- c(catcols,v)
 # encode the categorical variables and create a matrix for the xgboost training
