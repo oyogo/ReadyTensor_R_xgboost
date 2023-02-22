@@ -101,3 +101,6 @@ telco_json <- rjson::toJSON(telco2)
 write_json(telco_json,"./telcojsn.json")
 ```
 
+References
+1. https://rpubs.com/hariteja/xgb
+2. https://cran.r-project.org/web/packages/xgboost/vignettes/discoverYourData.html

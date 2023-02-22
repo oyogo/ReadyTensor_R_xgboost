@@ -7,7 +7,7 @@ library(data.table) # Opted for this, 1. Because its really fast 2. dplyr confli
 library(rjson) # for handling json data
 library(FeatureHashing)
 library(glue)
-library(superml)
+library(superml) # for label encoding the response variable 
 
 
 # function for transforming the prediction features into a sparse matrix for training and prediction.
